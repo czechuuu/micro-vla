@@ -44,20 +44,32 @@ Example for the `dataset_states_to_obs.py`:
 1. python ./libs/robomimic/robomimic/scripts/dataset_states_to_obs.py \  
 --dataset /content/data/lift/ph/raw.hdf5 --output_name full.hdf5 \  
 --shaped --camera_names robot0_robotview robot0_eye_in_hand \  
---camera_height 512 --camera_width 512 --done_mode 0
+--camera_height 512 --camera_width 512 --done_mode 0 \
+--compress --exclude-next-obs
 
 *Note:*  
 *For available flags and their semantics see `dataset_states_to_obs.py` source code [here](https://github.com/ARISE-Initiative/robomimic/blob/master/robomimic/scripts/dataset_states_to_obs.py).*
 
 ## Sample Trajectory
 
-### `robotview`
-![robotview perspective animation](robotview.gif)
+### Block Lifting
 
-### `eye_in_hand`
-![eye_in_hand perspective animation](eye_in_hand.gif)
+#### `robotview`
+![robotview perspective animation](gifs/block_robotview.gif)
+
+#### `eye_in_hand`
+![eye_in_hand perspective animation](gifs/block_eye_in_hand.gif)
+
+### Nut Assembly (Square)
+
+#### `robotview`
+![robotview perspective animation](gifs/nut_robotview.gif)
+
+#### `eye_in_hand`
+![eye_in_hand perspective animation](gifs/nut_eye_in_hand.gif)
 
 
 ## Additional Info
-- Running the "Observation and Rewards Extraction" step took <2min on a laptop GPU (NVIDIA GeForce RTX 3050 Laptop) and utilized <<1GB of VRAM (~500MB).
+- Running the "Observation and Rewards Extraction" step took <10min on a laptop GPU (NVIDIA GeForce RTX 3050 Laptop) and utilized <<1GB of VRAM (~500MB) for the "block-lifting" dataset and <15min, and around the same VRAM for "nut assembly".
+- The datasets with images are heavy - 3GB and 10GB each. The embedding ones are lighter (<200MB).
 - I didn't manage to perform the "Observation and Rewards Extraction" step on Google Colab. Neither the CPU nor GPU environments seemed to work. When trying to use the `egl` engine the program segfaulted (failed to set `mujoco_ctx`) - `egl_probe` revealed that there was no device available for rendering. I tried to set a different MuJoCo rendering engine (osmesa) that supposedly uses only the CPU, but this approach failed as well.
