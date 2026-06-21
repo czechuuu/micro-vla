@@ -1,4 +1,5 @@
 import os
+import json
 import h5py
 import random
 import torch
@@ -117,6 +118,7 @@ def train_micro_vla(
     # -----------------------------------------
     # 4. Training & Validation Loop
     # -----------------------------------------
+    losses_history = []
     for epoch in range(config.num_epochs):
 
         # --- TRAINING PHASE ---
@@ -230,6 +232,26 @@ def train_micro_vla(
         epoch_checkpoint = os.path.join(run_dir, f"epoch_{epoch}.pt")
         torch.save(model.state_dict(), epoch_checkpoint)
         print(f"Saved epoch checkpoint: {epoch_checkpoint}")
+
+        # Save losses history to JSON
+        epoch_task_losses = {}
+        for i in range(num_tasks):
+            if task_test_counts[i] > 0:
+                avg_task_loss = task_test_losses[i] / task_test_counts[i]
+                task_name = hdf5_paths[i].split("/")[-1]
+                epoch_task_losses[task_name] = avg_task_loss
+
+        losses_history.append({
+            "epoch": epoch + 1,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_test_loss,
+            "task_val_losses": epoch_task_losses
+        })
+
+        losses_file = os.path.join(run_dir, "losses.json")
+        with open(losses_file, "w") as f:
+            json.dump(losses_history, f, indent=4)
+        print(f"Saved losses history to {losses_file}")
 
     # -----------------------------------------
     # 5. Save Model Checkpoint
