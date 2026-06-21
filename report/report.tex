@@ -1,0 +1,55 @@
+\documentclass{article}
+
+% Language and encoding settings
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Essential packages
+\usepackage{graphicx}      % For importing images
+\usepackage{amsmath,amssymb} % For mathematical formatting
+\usepackage{booktabs}      % For professional tables
+\usepackage{hyperref}      % For clickable links and cross-references
+
+% Metadata
+\title{Micro-VLA: Scaling In-Context Robotic Manipulation via Observation-Only Videos \footnote{we strayed from the observation only part}}
+\author{Adrian Boguszewski, Bartosz Czechowski}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Chosen environment}
+We have chosen the Robosuite environment to work with. We have decided to use the related Robomimic dataset to train our models. 
+The first task we wanted to achieve is to train a model on a task (e.g. Lift - which consists of picking up a red cube from the table), and evaluate it on a slight variation of the same task (e.g. changing the colour of the cube to blue, or changing the shape to a cylinder). 
+The second task we wanted to achieve is to train a model on a set of tasks (e.g. Lift, and Nut Assembly - which consists of putting a nut on top of a bolt), and evaluate it on a more complex task (e.g. Stack - which consists of picking up a red cube from the table, and stacking it on top of a blue cube).
+
+We had to postprocess the robomimic PH dataset as it wasn't publicly released in a full form with the images included and dense rewards.
+
+We had also built an evaluation suite - an extendable framework for evaluating models on the Robosuite environment. It allows us to easily add new tasks, abstract away the implementation details of the environment, and of the models.
+\section{Initial Idea - finetuning a pretrained VLA model}
+Since the project had VLA in its name our initial idea was to start from a pretrained VLA model and to fine-tune it on our tasks. 
+We have decided to use one called SmolVLA mainly because of it's low computational requirements - most VLA would be out of our reach to fine tune on a single consumer grade (i.e. colab T4 with 14GB VRAM GPU).
+We have spent some time trying to get it to work - and have managed to get some first successful attempts (although very rare - success rate was approx. 10\%) on the Lift task, but we have realized that with one epoch taking over 1h of compute this approach wasn't going to work well. 
+
+\section{Pivot - traning a Decision Transformer from (almost) scratch}
+In order to be able to iterate faster and test more ideas we have decided to pivot and to train a Decision Transformer from scratch - but using a pretrained vision encoder (e.g. Dino).
+This combined with preprocessing the dataset to contain Dino embeddings of every frame allowed us to train a model in a matter of minutes instead of hours.
+
+\subsection{First results}
+With a significantly faster training time we have managed to get a a model that was able to achieve better results on the Lift task.
+
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{non_icl_variance_graph.png} % Load image & set width
+    \caption{Training and validation loss as well as success rates across epochs of training a bare Decision Transformer on the Lift task.}
+    \label{fig:non_icl_variance_graph} 
+\end{figure}
+
+One thing worth noticing is the variance of the success rates across epochs and the lack of correlation between the validation loss and the success rate. This is a problem raised by the robomimic paper. 
+Because of this we have decided to evaluate 5 last models of the training of our models instead of just the best one (in terms of validation loss) - and to report the success rates across those 5 models.
+
+We have also decided to evaluate the model - trained on only the red cube - on the blue and green cubes. It showed similar zero-shot performance as on the red cube.
+
+
+\end{document}
