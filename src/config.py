@@ -25,6 +25,7 @@ class Config:
     use_rtg: bool = False # Only valid if use_reward_tokens = True. Decides whether to use RTG or standard step-wise rewards.
     fuse_observations: bool = False # Whether we should fuse cameras and proprio into one latent token or let them be separate.
     use_time_based_rewards: bool = False
+    time_based_success_reward: float = 100.0
 
 
     dataset_stats: dict = field(

@@ -80,6 +80,7 @@ def main():
     parser.add_argument("--use-rtg", action="store_true", default=False, help="Model trained with returns-to-go.")
     parser.add_argument("--fuse-observations", action="store_true", default=False, help="Model trained with early fused observations.")
     parser.add_argument("--use-time-based-rewards", action="store_true", default=False, help="Model trained with time-based rewards.")
+    parser.add_argument("--time-based-success-reward", type=float, default=100.0, help="Reward value on task success for time-based rewards.")
     parser.add_argument("--target-return", type=float, default=None, help="Target return for RTG conditioning during evaluation.")
     
     parser.add_argument(
@@ -201,6 +202,7 @@ def main():
                 cfg.target_return = args.target_return
             if args.use_time_based_rewards:
                 cfg.use_time_based_rewards = True
+            cfg.time_based_success_reward = args.time_based_success_reward
         else:
             print("No config file specified or auto-detected. Using command-line defaults/overrides.")
             cfg = Config(
@@ -215,6 +217,7 @@ def main():
                 use_rtg=args.use_rtg,
                 fuse_observations=args.fuse_observations,
                 use_time_based_rewards=args.use_time_based_rewards,
+                time_based_success_reward=args.time_based_success_reward,
                 target_return=args.target_return if args.target_return is not None else 50.0
             )
 

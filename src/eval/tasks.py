@@ -72,7 +72,7 @@ def build_standard_env(
 
         if cfg.use_time_based_rewards:
             dones = ep_grp['dones'][:]
-            rewards = np.where(dones == 1, cfg.target_return, -1.0)
+            rewards = np.where(dones == 1, cfg.time_based_success_reward, -1.0)
         else:
             rewards = ep_grp['rewards'][:]
         # Calculate full trajectory RTG, then slice the first K elements
@@ -275,7 +275,7 @@ def build_standard_lift(
 
         if cfg.use_time_based_rewards:
             dones = ep_grp['dones'][:]
-            rewards = np.where(dones == 1, cfg.target_return, -1.0)
+            rewards = np.where(dones == 1, cfg.time_based_success_reward, -1.0)
         else:
             rewards = ep_grp['rewards'][:]
         # Calculate full trajectory RTG, then slice the first K elements
@@ -358,7 +358,7 @@ def build_standard_stack(
 
         if cfg.use_time_based_rewards:
             dones = ep_grp['dones'][:]
-            rewards = np.where(dones == 1, cfg.target_return, -1.0)
+            rewards = np.where(dones == 1, cfg.time_based_success_reward, -1.0)
         else:
             rewards = ep_grp['rewards'][:]
         # Calculate full trajectory RTG, then slice the first K elements

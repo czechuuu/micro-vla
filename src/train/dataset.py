@@ -87,7 +87,7 @@ class MicroVLADataset(Dataset):
         # -------------------------------------------------------------
         if self.config.use_time_based_rewards:
             dones = ep_grp['dones'][:]
-            step_rewards = np.where(dones == 1, self.config.target_return, -1.0)
+            step_rewards = np.where(dones == 1, self.config.time_based_success_reward, -1.0)
         else:
             step_rewards = ep_grp['rewards'][:]
 

@@ -88,7 +88,7 @@ class DecisionTransformerWrapper(BasePolicy):
 
     def register_reward(self, reward: float, is_success: bool = False):
         if self.cfg.use_time_based_rewards:
-            step_reward = self.cfg.target_return if is_success else -1.0
+            step_reward = self.cfg.time_based_success_reward if is_success else -1.0
             self.current_rtg -= step_reward
         else:
             self.current_rtg -= reward
