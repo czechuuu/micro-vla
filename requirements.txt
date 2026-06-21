@@ -1,0 +1,12 @@
+torch
+torchvision
+h5py
+numpy
+scipy
+robosuite
+imageio
+imageio-ffmpeg
+tqdm
+transformers
+huggingface_hub
+matplotlib
