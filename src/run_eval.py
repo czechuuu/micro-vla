@@ -15,7 +15,8 @@ from src.eval.tasks import (
     build_standard_stack,
     build_color_varied_lift,
     build_color_varied_lift_with_distractor,
-    build_puck_lift
+    build_puck_lift,
+    build_nut_assembly_square
 )
 
 def main():
@@ -43,7 +44,7 @@ def main():
         "--tasks", 
         nargs="+", 
         default=["Standard_Lift", "Red_Cube_Lift"],
-        help="Tasks to evaluate (Standard_Lift, Standard_Stack, Red_Cube_Lift, Blue_Cube_Lift, Green_Cube_Lift, Blue_Cube_With_Distractor_Lift, Puck_Lift)."
+        help="Tasks to evaluate (Standard_Lift, Standard_Stack, Red_Cube_Lift, Blue_Cube_Lift, Green_Cube_Lift, Blue_Cube_With_Distractor_Lift, Puck_Lift, Nut_Assembly_Square)."
     )
     parser.add_argument(
         "--lift-dataset", 
@@ -56,6 +57,12 @@ def main():
         type=str, 
         default="dino3-embeddings/block-stacking/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for Standard_Stack."
+    )
+    parser.add_argument(
+        "--nut-dataset", 
+        type=str, 
+        default="dino3-embeddings/nut-assembly-square/ph.hdf5",
+        help="HF or local HDF5 path to extract context demonstrations for Nut_Assembly_Square."
     )
     
     # Evaluation run settings
@@ -173,6 +180,17 @@ def main():
         else:
             stack_h5 = os.path.abspath(args.stack_dataset)
 
+    nut_h5 = args.nut_dataset
+    if "Nut_Assembly_Square" in args.tasks:
+        if not os.path.exists(args.nut_dataset):
+            try:
+                nut_h5 = resolve_hdf5_path(args.nut_dataset)
+            except Exception as e:
+                print(f"Error: Could not resolve nut dataset '{args.nut_dataset}': {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            nut_h5 = os.path.abspath(args.nut_dataset)
+
     # Loop over all checkpoints
     all_runs_results = {}
 
@@ -230,6 +248,7 @@ def main():
             "Green_Cube_Lift": lambda: build_color_varied_lift(horizon=args.horizon, rgba=[0, 1, 0, 1]),
             "Blue_Cube_With_Distractor_Lift": lambda: build_color_varied_lift_with_distractor(horizon=args.horizon, rgba=[0, 0, 1, 1], distractor_rgba=[1, 0, 0, 1]),
             "Puck_Lift": lambda: build_puck_lift(horizon=args.horizon),
+            "Nut_Assembly_Square": lambda: build_nut_assembly_square(cfg=cfg, hdf5_path=nut_h5, horizon=args.horizon),
         }
         
         # Filter requested tasks

@@ -449,3 +449,86 @@ def build_puck_lift(
         "rtg": None,
     }
     return env, context
+
+
+def build_nut_assembly_square(
+    hdf5_path: str,
+    cfg,
+    camera_names=["robot0_robotview", "robot0_eye_in_hand"],
+    control_freq=20,
+    horizon=300
+):
+    """
+    Builds the standard Robosuite NutAssemblySquare environment and extracts a random
+    demonstration trajectory from the dataset to serve as the ICL context.
+    """
+    # 1. Instantiate the Environment
+    env = robosuite.make(
+        "NutAssemblySquare",
+        robots="Panda",
+        has_renderer=False,           # Headless for evaluation loops
+        has_offscreen_renderer=True,  # Required to grab camera frames
+        use_camera_obs=True,
+        camera_names=camera_names,
+        control_freq=control_freq,
+        horizon=horizon,
+        camera_heights=512,
+        camera_widths=512,
+        reward_shaping=True,
+    )
+
+    # 2. Extract ICL Context from Dataset
+    with h5py.File(hdf5_path, 'r') as f:
+        base_grp = f['data'] if 'data' in f else f
+        demos = [k for k in base_grp.keys() if k.startswith('demo_')]
+
+        # Pick a random demonstration
+        demo = random.choice(demos)
+        ep_grp = base_grp[demo]
+
+        ep_len = ep_grp['actions'].shape[0]
+        # We extract from the beginning of the episode up to context_len
+        K = min(cfg.context_len, ep_len)
+
+        # --- A. Proprioception (State) ---
+        obs_slice = {
+            'robot0_eef_pos': ep_grp['obs']['robot0_eef_pos'][:K],
+            'robot0_eef_quat': ep_grp['obs']['robot0_eef_quat'][:K],
+            'robot0_gripper_qpos': ep_grp['obs']['robot0_gripper_qpos'][:K]
+        }
+
+        # Ensure extract_7dof_state is in scope
+        state_features = extract_7dof_state(obs_slice)  # Shape: (K, 7)
+        state_tensor = torch.tensor(state_features, dtype=torch.float32)
+
+        # Normalize State using Config Stats
+        state_mean = cfg.dataset_stats["observation.state"]["mean"].clone().detach().to(torch.float32)
+        state_std = cfg.dataset_stats["observation.state"]["std"].clone().detach().to(torch.float32)
+        normalized_state = (state_tensor - state_mean) / (state_std + 1e-6)
+
+        # --- B. Vision (Dino embeddings)
+        raw_rv = torch.tensor(ep_grp['obs']['robot0_robotview_image'][:K], dtype=torch.float32)
+        raw_eye = torch.tensor(ep_grp['obs']['robot0_eye_in_hand_image'][:K], dtype=torch.float32)
+
+        # --- C. Actions & Returns-To-Go ---
+        actions = torch.tensor(ep_grp['actions'][:K], dtype=torch.float32)
+
+        if cfg.use_time_based_rewards:
+            dones = ep_grp['dones'][:]
+            rewards = np.where(dones == 1, cfg.time_based_success_reward, -1.0)
+        else:
+            rewards = ep_grp['rewards'][:]
+        # Calculate full trajectory RTG, then slice the first K elements
+        rtg_array = np.cumsum(rewards[::-1])[::-1][:K].copy()
+        rtg = torch.tensor(rtg_array, dtype=torch.float32).unsqueeze(-1)
+
+    # 3. Package Context Dictionary
+    context = {
+        "eef_state": normalized_state,
+        "img_robotview": raw_rv,
+        "img_eye": raw_eye,
+        "actions": actions,
+        "rtg": rtg
+    }
+
+    return env, context
