@@ -99,3 +99,120 @@ def resolve_hdf5_path(
     hdf5_path = hf_hub_download(repo_id=repo_id, filename=filename, repo_type="dataset")
     print(f"Resolved path: {hdf5_path}")
     return hdf5_path
+
+
+def get_dataset_stats(
+    filenames: list[str] | str,
+    repo_id: str = "aboguszewski/robomimic"
+) -> dict:
+    """
+    Calculates trajectory statistics (min, max, mean trajectory length, etc.)
+    for the specified HDF5 dataset(s).
+
+    Args:
+        filenames (list[str] | str): One or more local dataset paths or Hugging Face filenames.
+        repo_id (str): Hugging Face repo ID to resolve paths if filenames are HF keys.
+
+    Returns:
+        dict: A dictionary of statistics for each dataset, and overall stats.
+    """
+    import os
+
+    if isinstance(filenames, str):
+        filenames = [filenames]
+
+    stats_dict = {}
+
+    for filename in filenames:
+        # Resolve the file path (either local or HF download)
+        if os.path.exists(filename):
+            hdf5_path = filename
+        else:
+            hdf5_path = hf_hub_download(repo_id=repo_id, filename=filename, repo_type="dataset")
+
+        print(f"Calculating stats for: {filename} (resolved: {hdf5_path})")
+
+        with h5py.File(hdf5_path, 'r') as f:
+            base_grp = f['data'] if 'data' in f else f
+            demo_keys = list(base_grp.keys())
+
+            # Filter demo keys (typically start with 'demo_')
+            demo_keys = [k for k in demo_keys if k.startswith('demo_') or isinstance(base_grp[k], h5py.Group)]
+
+            trajectory_lengths = []
+
+            for demo_key in demo_keys:
+                demo_grp = base_grp[demo_key]
+
+                # Find any dataset in the demo group to get the trajectory length from its first dimension
+                demo_len = None
+
+                # Check direct children first (e.g. actions)
+                for name, item in demo_grp.items():
+                    if isinstance(item, h5py.Dataset):
+                        demo_len = item.shape[0]
+                        break
+
+                # If not found, look deeper recursively or check 'obs'
+                if demo_len is None and 'obs' in demo_grp:
+                    obs_grp = demo_grp['obs']
+                    for name, item in obs_grp.items():
+                        if isinstance(item, h5py.Dataset):
+                            demo_len = item.shape[0]
+                            break
+
+                if demo_len is not None:
+                    trajectory_lengths.append(demo_len)
+
+            if not trajectory_lengths:
+                print(f"Warning: No trajectories found in {filename}.")
+                continue
+
+            total_demos = len(trajectory_lengths)
+            total_timesteps = sum(trajectory_lengths)
+            min_len = min(trajectory_lengths)
+            max_len = max(trajectory_lengths)
+            mean_len = float(np.mean(trajectory_lengths))
+
+            file_stats = {
+                "total_demos": total_demos,
+                "total_timesteps": total_timesteps,
+                "min_trajectory_len": min_len,
+                "max_trajectory_len": max_len,
+                "mean_trajectory_len": mean_len
+            }
+
+            print(f"=== Stats for {filename} ===")
+            print(f"  Total Demonstrations: {total_demos}")
+            print(f"  Total Timesteps:       {total_timesteps}")
+            print(f"  Min Trajectory Len:    {min_len}")
+            print(f"  Max Trajectory Len:    {max_len}")
+            print(f"  Mean Trajectory Len:   {mean_len:.2f}\n")
+
+            stats_dict[filename] = file_stats
+
+    # If multiple files, calculate aggregated stats
+    if len(stats_dict) > 1:
+        all_min = min(s["min_trajectory_len"] for s in stats_dict.values())
+        all_max = max(s["max_trajectory_len"] for s in stats_dict.values())
+        all_demos = sum(s["total_demos"] for s in stats_dict.values())
+        all_timesteps = sum(s["total_timesteps"] for s in stats_dict.values())
+        all_mean = all_timesteps / all_demos if all_demos > 0 else 0.0
+
+        aggregated = {
+            "total_demos": all_demos,
+            "total_timesteps": all_timesteps,
+            "min_trajectory_len": all_min,
+            "max_trajectory_len": all_max,
+            "mean_trajectory_len": all_mean
+        }
+        stats_dict["overall"] = aggregated
+
+        print("=== Aggregated Stats ===")
+        print(f"  Total Demonstrations: {all_demos}")
+        print(f"  Total Timesteps:       {all_timesteps}")
+        print(f"  Min Trajectory Len:    {all_min}")
+        print(f"  Max Trajectory Len:    {all_max}")
+        print(f"  Mean Trajectory Len:   {all_mean:.2f}\n")
+
+    return stats_dict
