@@ -54,7 +54,7 @@ def main():
     parser.add_argument(
         "--stack-dataset", 
         type=str, 
-        default="dino3-embeddings/block-lifting/mh-better.hdf5",
+        default="dino3-embeddings/block-stacking/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for Standard_Stack."
     )
     
