@@ -50,9 +50,34 @@ def main():
     parser.add_argument("--use-rtg", action="store_true", default=False, help="Use returns-to-go instead of step rewards.")
     parser.add_argument("--fuse-observations", action="store_true", default=False, help="Fuse all observation modalities early.")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu", help="PyTorch computing device.")
+    parser.add_argument(
+        "--from-file", "--from_file",
+        type=str,
+        default=None,
+        help="Path to a JSON file containing argument overrides."
+    )
 
-    
     args = parser.parse_args()
+
+    # Load arguments from file if specified
+    if args.from_file is not None:
+        if not os.path.exists(args.from_file):
+            print(f"Error: JSON file '{args.from_file}' does not exist.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            import json
+            with open(args.from_file, "r") as f:
+                file_args = json.load(f)
+            print(f"Loading CLI arguments from file: {args.from_file}")
+            for k, v in file_args.items():
+                if hasattr(args, k):
+                    setattr(args, k, v)
+                else:
+                    print(f"Warning: Unknown argument '{k}' in JSON file - ignoring.")
+        except Exception as e:
+            print(f"Error reading JSON file '{args.from_file}': {e}", file=sys.stderr)
+            sys.exit(1)
+
     
     # 1. Resolve dataset paths
     resolved_paths = []

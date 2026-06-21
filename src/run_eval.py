@@ -25,9 +25,10 @@ def main():
     parser.add_argument(
         "--checkpoint", 
         type=str, 
-        required=True, 
+        default=None, 
         help="Path to the trained PyTorch model checkpoint (.pt or .weights)."
     )
+
     parser.add_argument(
         "--config", 
         type=str, 
@@ -78,12 +79,43 @@ def main():
     parser.add_argument("--use-rtg", action="store_true", default=False, help="Model trained with returns-to-go.")
     parser.add_argument("--fuse-observations", action="store_true", default=False, help="Model trained with early fused observations.")
     
+    parser.add_argument(
+        "--from-file", "--from_file",
+        type=str,
+        default=None,
+        help="Path to a JSON file containing argument overrides."
+    )
+
     args = parser.parse_args()
-    
+
+    # Load arguments from file if specified
+    if args.from_file is not None:
+        if not os.path.exists(args.from_file):
+            print(f"Error: JSON file '{args.from_file}' does not exist.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            import json
+            with open(args.from_file, "r") as f:
+                file_args = json.load(f)
+            print(f"Loading CLI arguments from file: {args.from_file}")
+            for k, v in file_args.items():
+                if hasattr(args, k):
+                    setattr(args, k, v)
+                else:
+                    print(f"Warning: Unknown argument '{k}' in JSON file - ignoring.")
+        except Exception as e:
+            print(f"Error reading JSON file '{args.from_file}': {e}", file=sys.stderr)
+            sys.exit(1)
+
     # 1. Validate checkpoint exists
+    if args.checkpoint is None:
+        print("Error: --checkpoint is required (must be specified on command line or via JSON file).", file=sys.stderr)
+        sys.exit(1)
+
     if not os.path.exists(args.checkpoint):
         print(f"Error: Model checkpoint '{args.checkpoint}' does not exist.", file=sys.stderr)
         sys.exit(1)
+
         
     # 2. Resolve HDF5 dataset paths if standard tasks are evaluated
     lift_h5 = args.lift_dataset
