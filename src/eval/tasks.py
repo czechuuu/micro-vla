@@ -70,7 +70,11 @@ def build_standard_env(
         # --- C. Actions & Returns-To-Go ---
         actions = torch.tensor(ep_grp['actions'][:K], dtype=torch.float32)
 
-        rewards = ep_grp['rewards'][:]
+        if cfg.use_time_based_rewards:
+            dones = ep_grp['dones'][:]
+            rewards = np.where(dones == 1, cfg.target_return, -1.0)
+        else:
+            rewards = ep_grp['rewards'][:]
         # Calculate full trajectory RTG, then slice the first K elements
         rtg_array = np.cumsum(rewards[::-1])[::-1][:K].copy()
         rtg = torch.tensor(rtg_array, dtype=torch.float32).unsqueeze(-1)
@@ -269,7 +273,11 @@ def build_standard_lift(
         # --- C. Actions & Returns-To-Go ---
         actions = torch.tensor(ep_grp['actions'][:K], dtype=torch.float32)
 
-        rewards = ep_grp['rewards'][:]
+        if cfg.use_time_based_rewards:
+            dones = ep_grp['dones'][:]
+            rewards = np.where(dones == 1, cfg.target_return, -1.0)
+        else:
+            rewards = ep_grp['rewards'][:]
         # Calculate full trajectory RTG, then slice the first K elements
         rtg_array = np.cumsum(rewards[::-1])[::-1][:K].copy()
         rtg = torch.tensor(rtg_array, dtype=torch.float32).unsqueeze(-1)
@@ -348,7 +356,11 @@ def build_standard_stack(
         # --- C. Actions & Returns-To-Go ---
         actions = torch.tensor(ep_grp['actions'][:K], dtype=torch.float32)
 
-        rewards = ep_grp['rewards'][:]
+        if cfg.use_time_based_rewards:
+            dones = ep_grp['dones'][:]
+            rewards = np.where(dones == 1, cfg.target_return, -1.0)
+        else:
+            rewards = ep_grp['rewards'][:]
         # Calculate full trajectory RTG, then slice the first K elements
         rtg_array = np.cumsum(rewards[::-1])[::-1][:K].copy()
         rtg = torch.tensor(rtg_array, dtype=torch.float32).unsqueeze(-1)

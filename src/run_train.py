@@ -48,6 +48,8 @@ def main():
     parser.add_argument("--no-icl", action="store_false", dest="use_icl", help="Train in standard mode (query only).")
     parser.add_argument("--use-reward-tokens", action="store_true", default=False, help="Incorporate reward tokens in sequence.")
     parser.add_argument("--use-rtg", action="store_true", default=False, help="Use returns-to-go instead of step rewards.")
+    parser.add_argument("--use-time-based-rewards", action="store_true", default=False, help="Use time-based rewards (-1 step reward, target_return success).")
+    parser.add_argument("--target-return", type=float, default=50.0, help="Target return value (used as success reward if use-time-based-rewards).")
     parser.add_argument("--fuse-observations", action="store_true", default=False, help="Fuse all observation modalities early.")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu", help="PyTorch computing device.")
     parser.add_argument(
@@ -119,7 +121,9 @@ def main():
         dropout=args.dropout,
         use_reward_tokens=args.use_reward_tokens,
         use_rtg=args.use_rtg,
-        fuse_observations=args.fuse_observations
+        fuse_observations=args.fuse_observations,
+        use_time_based_rewards=args.use_time_based_rewards,
+        target_return=args.target_return
     )
     
     # 4. Trigger training

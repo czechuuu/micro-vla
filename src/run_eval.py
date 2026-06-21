@@ -79,6 +79,8 @@ def main():
     parser.add_argument("--use-reward-tokens", action="store_true", default=False, help="Model trained with reward tokens.")
     parser.add_argument("--use-rtg", action="store_true", default=False, help="Model trained with returns-to-go.")
     parser.add_argument("--fuse-observations", action="store_true", default=False, help="Model trained with early fused observations.")
+    parser.add_argument("--use-time-based-rewards", action="store_true", default=False, help="Model trained with time-based rewards.")
+    parser.add_argument("--target-return", type=float, default=None, help="Target return for RTG conditioning during evaluation.")
     
     parser.add_argument(
         "--from-file", "--from_file",
@@ -195,6 +197,10 @@ def main():
             cfg = Config.load(current_config_path)
             cfg.model_id = checkpoint
             cfg.device = torch.device(args.device)
+            if args.target_return is not None:
+                cfg.target_return = args.target_return
+            if args.use_time_based_rewards:
+                cfg.use_time_based_rewards = True
         else:
             print("No config file specified or auto-detected. Using command-line defaults/overrides.")
             cfg = Config(
@@ -207,7 +213,9 @@ def main():
                 nhead=args.nhead,
                 use_reward_tokens=args.use_reward_tokens,
                 use_rtg=args.use_rtg,
-                fuse_observations=args.fuse_observations
+                fuse_observations=args.fuse_observations,
+                use_time_based_rewards=args.use_time_based_rewards,
+                target_return=args.target_return if args.target_return is not None else 50.0
             )
 
         # 4. Map task names to their respective builders

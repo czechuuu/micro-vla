@@ -82,13 +82,13 @@ class BenchmarkSuite:
             action = policy.get_action(obs, context)
             obs, reward, done, info = env.step(action)
 
+            is_current_success = env._check_success()
+
             if hasattr(policy, "register_reward"):
-                policy.register_reward(reward)
+                policy.register_reward(reward, is_success=is_current_success)
 
             if self.save_videos:
                 frames.append(np.flipud(obs["robot0_robotview_image"]))
-
-            is_current_success = env._check_success()
 
             # Trigger success on a single frame
             if not success and is_current_success:

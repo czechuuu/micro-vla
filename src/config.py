@@ -20,10 +20,11 @@ class Config:
     dropout: float = 0.1
     image_size: int = 512
     vision_embed_dim: int = 512
-    target_return: float = 15.5
+    target_return: float = 50.0
     use_reward_tokens: bool = False
     use_rtg: bool = False # Only valid if use_reward_tokens = True. Decides whether to use RTG or standard step-wise rewards.
     fuse_observations: bool = False # Whether we should fuse cameras and proprio into one latent token or let them be separate.
+    use_time_based_rewards: bool = False
 
 
     dataset_stats: dict = field(

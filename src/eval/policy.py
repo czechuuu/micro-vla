@@ -30,7 +30,7 @@ class BasePolicy(abc.ABC):
         """
         pass
 
-    def register_reward(self, reward: float):
+    def register_reward(self, reward: float, is_success: bool = False):
         """
         Register a reward from the environment to track returns for RTG calculation.
         """
@@ -86,8 +86,12 @@ class DecisionTransformerWrapper(BasePolicy):
         self.current_timestep = 0
         self.current_rtg = self.cfg.target_return
 
-    def register_reward(self, reward: float):
-        self.current_rtg -= reward
+    def register_reward(self, reward: float, is_success: bool = False):
+        if self.cfg.use_time_based_rewards:
+            step_reward = self.cfg.target_return if is_success else -1.0
+            self.current_rtg -= step_reward
+        else:
+            self.current_rtg -= reward
 
     @torch.no_grad()
     def get_action(self, obs: dict, context: dict = None) -> np.ndarray:

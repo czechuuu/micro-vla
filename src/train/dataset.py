@@ -85,13 +85,19 @@ class MicroVLADataset(Dataset):
         # -------------------------------------------------------------
         # MODIFIED: Conditionally calculate RTG or use step rewards
         # -------------------------------------------------------------
-        if getattr(self.config, 'use_rtg', True): # Defaults to True if flag is missing
+        if self.config.use_time_based_rewards:
+            dones = ep_grp['dones'][:]
+            step_rewards = np.where(dones == 1, self.config.target_return, -1.0)
+        else:
+            step_rewards = ep_grp['rewards'][:]
+
+        if self.config.use_rtg:
             # Returns-to-go (Cumulative future rewards)
-            all_future_rewards = ep_grp['rewards'][start:]
+            all_future_rewards = step_rewards[start:]
             processed_rewards = np.cumsum(all_future_rewards[::-1])[::-1][:actual_K].copy()
         else:
             # Standard single-step rewards
-            processed_rewards = ep_grp['rewards'][start:end].copy()
+            processed_rewards = step_rewards[start:end].copy()
             
         rewards_tensor = torch.tensor(processed_rewards, dtype=torch.float32).unsqueeze(-1)
 
