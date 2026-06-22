@@ -534,7 +534,7 @@ def build_nut_assembly_square(
     return env, context
 
 
-def build_sawyer_lift(
+def build_iiwa_lift(
     hdf5_path: str,
     cfg,
     camera_names=["robot0_robotview", "robot0_eye_in_hand"],
@@ -542,13 +542,13 @@ def build_sawyer_lift(
     horizon=300
 ):
     """
-    Builds the standard Robosuite Lift environment with the Sawyer robot and extracts a random
+    Builds the standard Robosuite Lift environment with the IIWA robot and extracts a random
     demonstration trajectory from the dataset to serve as the ICL context.
     """
     # 1. Instantiate the Environment
     env = robosuite.make(
         "Lift",
-        robots="Sawyer",
+        robots="IIWA",
         has_renderer=False,           # Headless for evaluation loops
         has_offscreen_renderer=True,  # Required to grab camera frames
         use_camera_obs=True,

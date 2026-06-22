@@ -24,7 +24,10 @@ def extract_7dof_state(obs):
 
     # 3. Gripper Width: Left Finger (0) - Right Finger (1)
     gripper_qpos = np.atleast_2d(obs['robot0_gripper_qpos'])
-    width = gripper_qpos[:, 0] - gripper_qpos[:, 1]
+    if gripper_qpos.shape[1] == 2:
+        width = gripper_qpos[:, 0] - gripper_qpos[:, 1]
+    elif gripper_qpos.shape[1] == 6:
+        width = 0.08 - 0.1 * np.mean(np.abs(gripper_qpos), axis=1)
 
     # Expand width dimensions from (N,) to (N, 1) to match the other arrays
     width = np.expand_dims(width, axis=-1)
