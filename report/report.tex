@@ -142,7 +142,32 @@ The original datasets only contained raw trajectories (joint and environment sta
 All of our training data is publicly available on \href{https://huggingface.co/datasets/aboguszewski/robomimic}{\textit{HuggingFace}} with a comprehensive dataset card that goes into more technical details.
 
 \section{Model Architecture}
-TODO
+We used  a rather standard Decision Transformer architecture - with some implementation details described below.
+\subsection{Rewards}
+We made using rewards optional - as when learning from expert trajectories they don't carry much information.
+But if one decides to use rewards (possibly due to introducing sub-optimal trajectories in the dataset), it's configurable whether to use the dense rewards from the dataset (which grow as the model gets closer to the goal) or to use time based rewards (where we give a reward of -1 at every step, and +100 on success).
+Then these rewards are used in the return-to-go fashion from the original Decision Transformer paper.
+
+Using dense rewards is sub-optimal as it can be misleading - a model that takes longer to pick up the cube will get a higher total episode return than a model that picks it up faster.
+
+\subsection{Observations}
+As input the model takes a proprioperception vector (end-effector position, end-effector rotation, gripper width) and two precomputed Dino3 ViT-Small embeddings of the images from two cameras (eye in hand and robotview).
+It can be configured whether these should be concatenated into one vector which will be embedded into the latent space of the model, or whether they should be embedded separately and then attended to separately by the model.
+
+We have found that fusing the observations into one gives better results than attending to them separately.
+
+\subsection{In-context learning}
+We also implemented in-context learning - where we also provide the model with a successful trajectory of the task (during training and evaluation).
+
+\subsection{Positional Embeddings}
+We have decided to use learnable positional embeddings as in the original Decision Transformer paper. 
+When using in-context learning we have decided to reset the timestep counter to zero.
+
+Using sinusoidal positional embeddings and not resetting the timestep counters were considered but weren't evaluated.
+
+\subsection{Training}
+We have implemented a standard training loop with MSE loss. We have enabled training on multiple datasets with configurable weighed sampling. 
+
 
 \section{In Context Learning - Task Generalization}
 TODO
