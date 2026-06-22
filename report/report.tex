@@ -157,7 +157,7 @@ It can be configured whether these should be concatenated into one vector which 
 
 We have found that fusing the observations into one gives better results than attending to them separately.
 
-\subsection{In-context learning}
+\subsection{In-context Learning}
 We also implemented in-context learning - where we also provide the model with a successful trajectory of the task (during training and evaluation).
 
 \subsection{Positional Embeddings}
@@ -272,13 +272,13 @@ Our primary objective was to enable the model to perform manipulation tasks (suc
 We began by evaluating the zero-shot performance of models trained on the Panda arm Lift task. Out of the box, these models achieved a 0\% success rate, even when using in-context learning (ICL).
 We found that the model was unsurprisingly unable to learn when trained solely on the 10 available IIWA demonstrations.
 
-\subsection{Test-time adaptation}
+\subsection{Test-time Adaptation}
 Next, we evaluated the test-time adaptation capabilities of our model.
 To do so, we took a model pre-trained on the Panda arm Lift task and fine-tuned it on the 10 IIWA Lift demonstrations.
 The model achieved a success rate of approximately 50\% after only 5 gradient updates with a batch size of 8 (see Figure~\ref{fig:finetuned_iiwa_with_bigger_batch_size}).
 Increasing either the number of gradient updates or the batch size did not yield any improvements, and in fact degraded performance (which can be explained by the model overfitting to the small number of available demonstrations).
 
-\subsection{Training from scratch}
+\subsection{Training from Scratch}
 To improve these results, we trained a model from scratch on a combined dataset of 10 IIWA and 200 proficient human (PH) Panda Lift demonstrations. 
 To ensure that the IIWA demonstrations were not drowned out by the larger number of Panda demonstrations, we employed weighted sampling. 
 This approach achieved a success rate of approximately 80\% - significantly higher and more stable than the test-time adaptation approach (see Figure~\ref{fig:panda_to_iiwa}).
