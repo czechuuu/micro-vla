@@ -136,8 +136,8 @@ as well as the machine generated trajectories for block lifting (again, using th
 
 What we couldn't find in \textit{robomimic's} archive, we collected ourselves - block stacking demonstrations (using Panda and IIWA arms), and block lifting demonstrations for the IIWA arm.
 
-We also had to process those datasets to prepare the camera observations, rewards, and feature extractor embeddings of the camera observations for training efficiency (the feature extractor is described in the model architecture section).
-The original datasets only contained raw trajectories (joint and environment states).
+We also had to process those datasets to prepare the camera observations, rewards, and feature extractor embeddings of the camera observations for training efficiency (the feature extractor is described in the following section).
+The original datasets only contained raw trajectories (action, joint and environment state sequences).
 
 All of our training data is publicly available on \href{https://huggingface.co/datasets/aboguszewski/robomimic}{\textit{HuggingFace}} with a comprehensive dataset card that goes into more technical details.
 
@@ -168,6 +168,18 @@ Using sinusoidal positional embeddings and not resetting the timestep counters w
 \subsection{Training}
 We have implemented a standard training loop with MSE loss. We have enabled training on multiple datasets with configurable weighed sampling. 
 
+
+We performed an initial experiment to test whether this architecture was capable of learning the simplest of our tasks - block lifting.
+The experiment was successful (see Figure 6), however we came across a weird phenomenon (also described in the original \textit{robomimic} paper).
+The validation loss didn't correlate with model's performance inside the environment.
+This meant that for every experiment we had to perform validation rollouts inside the environment to accurately grasp model progress,
+and that it is worth to train the model much longer than we initially thought.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/plots/non_icl_variance_graph.png}
+    \caption{Training and validation losses, as well as success rates plotted against the training epochs on the block lifting task.}
+\end{figure}
 
 \section{In Context Learning - Task Generalization}
 TODO
