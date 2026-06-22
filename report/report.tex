@@ -110,35 +110,45 @@ The nut's location is randomized at the beginning of each episode, while the peg
 Throughout the project we use two robot arms: Panda and IIWA.
 The first one was chosen, because it was present in the datasets that we had access to (described later).
 The second one was selected for its similarity to the Panda - 6 degrees of freedom with similar kinematics and a single-degree-of-freedom gripper.
-Two distinct arms were necessary to test cross-embodiment generalization.
+Two distinct arms were necessary to evaluate cross-embodiment generalization.
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[b]{0.48\textwidth}
+  \begin{minipage}[b]{0.48\textwidth}
+    \centering
     \includegraphics[width=\textwidth]{images/arms/panda.png}
-  \end{subfigure}
-  \subcaption{Panda arm}
-  \begin{subfigure}[b]{0.48\textwidth}
+    \caption{Panda arm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.48\textwidth}
+    \centering
     \includegraphics[width=\textwidth]{images/arms/iiwa.png}
-  \end{subfigure}
-  \subcaption{IIWA arm}
+    \caption{IIWA arm}
+  \end{minipage}
 \end{figure}
 
-We've decided to use the related Robomimic dataset to train our models. 
-The first task we wanted to achieve is to train a model on a task (e.g. Lift - which consists of picking up a red cube from the table), and evaluate it on a slight variation of the same task (e.g. changing the colour of the cube to blue, or changing the shape to a cylinder). 
-The second task we wanted to achieve is to train a model on a set of tasks (e.g. Lift, and Nut Assembly - which consists of putting a nut on top of a bolt), and evaluate it on a more complex task (e.g. Stack - which consists of picking up a red cube from the table, and stacking it on top of a blue cube).
+\section{Training Data}
+As our training data we mainly used demonstrations sourced from \href{https://huggingface.co/datasets/robomimic/robomimic_datasets}{\textit{robomimic}}.
+In its totality, \textit{robomimic} is a more general framework, but we used it solely as a source of human demonstrations and dataset processing scripts.
 
-We had to postprocess the robomimic PH dataset as it wasn't publicly released in a full form with the images included and dense rewards.
+From \textit{robomimic} we took proficient human and multi-human (divided into "better", "okay" and "worse" operators) demonstrations for block lifting and nut assembly tasks (using the Panda arm),
+as well as the machine generated trajectories for block lifting (again, using the Panda arm).
 
-We had also built an evaluation suite - an extendable framework for evaluating models on the Robosuite environment. It allows us to easily add new tasks, abstract away the implementation details of the environment, and of the models.
-\section{Initial Idea - finetuning a pretrained VLA model}
-Since the project had VLA in its name our initial idea was to start from a pretrained VLA model and to fine-tune it on our tasks. 
-We have decided to use one called SmolVLA mainly because of it's low computational requirements - most VLA would be out of our reach to fine tune on a single consumer grade (i.e. colab T4 with 14GB VRAM GPU).
-We have spent some time trying to get it to work - and have managed to get some first successful attempts (although very rare - success rate was approx. 10\%) on the Lift task, but we have realized that with one epoch taking over 1h of compute this approach wasn't going to work well. 
+What we couldn't find in \textit{robomimic's} archive, we collected ourselves - block stacking demonstrations (using Panda and IIWA arms), and block lifting demonstrations for the IIWA arm.
 
-\section{Pivot - traning a Decision Transformer from (almost) scratch}
-In order to be able to iterate faster and test more ideas we have decided to pivot and to train a Decision Transformer from scratch - but using a pretrained vision encoder (e.g. Dino).
-This combined with preprocessing the dataset to contain Dino embeddings of every frame allowed us to train a model in a matter of minutes instead of hours.
+We also had to process those datasets to prepare the camera observations, rewards, and feature extractor embeddings of the camera observations for training efficiency (the feature extractor is described in the model architecture section).
+The original datasets only contained raw trajectories (joint and environment states).
+
+All of our training data is publicly available on \href{https://huggingface.co/datasets/aboguszewski/robomimic}{\textit{HuggingFace}} with a comprehensive dataset card that goes into more technical details.
+
+\section{Model Architecture}
+TODO
+
+\section{In Context Learning - Task Generalization}
+TODO
+
+\section{In Context Learning - Cross-embodiment Generalization}
+TODO
 
 \subsection{First results}
 With a significantly faster training time we have managed to get a a model that was able to achieve better results on the Lift task.
