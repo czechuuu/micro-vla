@@ -8,10 +8,11 @@
 \usepackage{graphicx}      % For importing images
 \usepackage{amsmath,amssymb} % For mathematical formatting
 \usepackage{booktabs}      % For professional tables
-\usepackage{hyperref}      % For clickable links and cross-references
+\usepackage{hyperref}      % For clickable links and cross-reference
+\usepackage{subcaption}
 
 % Metadata
-\title{Micro-VLA: Scaling In-Context Robotic Manipulation via Observation-Only Videos \footnote{we strayed from the observation only part}}
+\title{Micro-VLA: Scaling In-Context Robotic Manipulation via Observation-Only Videos \footnote{We dropped the "via Observation-Only Videos", as discussed with our lab teacher.}}
 \author{Adrian Boguszewski, Bartosz Czechowski}
 \date{\today}
 
@@ -19,8 +20,97 @@
 
 \maketitle
 
-\section{Chosen environment}
-We have chosen the Robosuite environment to work with. We have decided to use the related Robomimic dataset to train our models. 
+\section*{Opening Remarks}
+Throughout the report, the model that we are discussing is not a VLA.
+Initially we experimented with a pretrained, 500M parameter VLA - \href{https://huggingface.co/lerobot/smolvla\_base}{\textit{SmolVLA}}, however we quickly realized that it wasn't computationally feasible for us.
+One epoch of fine-tuning the action head (not even the VLM backbone) took around an hour on a Google Colab T4 GPU, and yielded around 10\% success rate on the simplest task we were interested in.
+We decided to train an order of magnitude smaller decision transformer from scratch (whose architecture will be disclosed in a later section).
+
+\section{The Environments}
+We decided to use \href{https://robosuite.ai/}{\textit{robosuite}}, which its authors describe as "a simulation framework powered by the MuJoCo physics engine for robot learning (...) (that) also offers a suite of benchmark environments for reproducible research".
+The decision was motivated by its easily configurable environments with an option to swap out robot arms to any of the available models.
+
+\subsection{Tasks}
+We chose a subset of three tasks, based on the following criteria: they have an obvious difficulty ordering, they can be seen as a natural extension of one another, and they have accompanying dataset (with an asterisk described in a later section).
+
+\subsubsection{Block Lifting}
+A cube is placed on the tabletop in front of a single robot arm.
+The robot arm must lift the cube above a certain height.
+The cube's location is randomized at the beginning of each episode.
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/lift/demo-11.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/lift/demo-22.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/lift/demo-33.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/lift/demo-44.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/lift/demo-55.png}
+  \end{subfigure}%
+  \caption {\textit{Block Lifting} task demonstration}
+\end{figure}
+
+\subsubsection{Block Stacking}
+Two cubes (red and green) are placed on the tabletop in front of a single robot arm.
+The robot must place the red cube on top of the green cube.
+The cubes' locations are randomized at the beginning of each episode.
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/stack/demo-19.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/stack/demo-38.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/stack/demo-57.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/stack/demo-76.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/stack/demo-95.png}
+  \end{subfigure}%
+  \caption {\textit{Block Stacking} task demonstration}
+\end{figure}
+
+\subsubsection{Nut Assembly (one square nut variant)}
+Two colored pegs (one square and one round) are mounted on the tabletop, and a square nut is placed on the table in front of a single robot arm.
+The robot must fit the square nut onto the square peg.
+The nut's location is randomized at the beginning of each episode, while the pegs are fixed.
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/nut/demo-25.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/nut/demo-50.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/nut/demo-75.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/nut/demo-100.png}
+  \end{subfigure}%
+  \begin{subfigure}[b]{0.20\textwidth}
+    \includegraphics[width=\textwidth]{gifs/nut/demo-125.png}
+  \end{subfigure}%
+  \caption {\textit{Nut Assembly} task demonstration}
+\end{figure}
+
+
+\subsection{Robot Arms}
+For 
+
+
+We've decided to use the related Robomimic dataset to train our models. 
 The first task we wanted to achieve is to train a model on a task (e.g. Lift - which consists of picking up a red cube from the table), and evaluate it on a slight variation of the same task (e.g. changing the colour of the cube to blue, or changing the shape to a cylinder). 
 The second task we wanted to achieve is to train a model on a set of tasks (e.g. Lift, and Nut Assembly - which consists of putting a nut on top of a bolt), and evaluate it on a more complex task (e.g. Stack - which consists of picking up a red cube from the table, and stacking it on top of a blue cube).
 
