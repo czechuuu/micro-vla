@@ -40,19 +40,19 @@ The cube's location is randomized at the beginning of each episode.
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/lift/demo-11.png}
+    \includegraphics[width=\textwidth]{images/lift/demo-11.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/lift/demo-22.png}
+    \includegraphics[width=\textwidth]{images/lift/demo-22.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/lift/demo-33.png}
+    \includegraphics[width=\textwidth]{images/lift/demo-33.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/lift/demo-44.png}
+    \includegraphics[width=\textwidth]{images/lift/demo-44.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/lift/demo-55.png}
+    \includegraphics[width=\textwidth]{images/lift/demo-55.png}
   \end{subfigure}%
   \caption {\textit{Block Lifting} task demonstration}
 \end{figure}
@@ -64,19 +64,19 @@ The cubes' locations are randomized at the beginning of each episode.
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/stack/demo-19.png}
+    \includegraphics[width=\textwidth]{images/stack/demo-19.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/stack/demo-38.png}
+    \includegraphics[width=\textwidth]{images/stack/demo-38.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/stack/demo-57.png}
+    \includegraphics[width=\textwidth]{images/stack/demo-57.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/stack/demo-76.png}
+    \includegraphics[width=\textwidth]{images/stack/demo-76.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/stack/demo-95.png}
+    \includegraphics[width=\textwidth]{images/stack/demo-95.png}
   \end{subfigure}%
   \caption {\textit{Block Stacking} task demonstration}
 \end{figure}
@@ -88,27 +88,41 @@ The nut's location is randomized at the beginning of each episode, while the peg
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/nut/demo-25.png}
+    \includegraphics[width=\textwidth]{images/nut/demo-25.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/nut/demo-50.png}
+    \includegraphics[width=\textwidth]{images/nut/demo-50.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/nut/demo-75.png}
+    \includegraphics[width=\textwidth]{images/nut/demo-75.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/nut/demo-100.png}
+    \includegraphics[width=\textwidth]{images/nut/demo-100.png}
   \end{subfigure}%
   \begin{subfigure}[b]{0.20\textwidth}
-    \includegraphics[width=\textwidth]{gifs/nut/demo-125.png}
+    \includegraphics[width=\textwidth]{images/nut/demo-125.png}
   \end{subfigure}%
   \caption {\textit{Nut Assembly} task demonstration}
 \end{figure}
 
 
 \subsection{Robot Arms}
-For 
+Throughout the project we use two robot arms: Panda and IIWA.
+The first one was chosen, because it was present in the datasets that we had access to (described later).
+The second one was selected for its similarity to the Panda - 6 degrees of freedom with similar kinematics and a single-degree-of-freedom gripper.
+Two distinct arms were necessary to test cross-embodiment generalization.
 
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{images/arms/panda.png}
+  \end{subfigure}
+  \subcaption{Panda arm}
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{images/arms/iiwa.png}
+  \end{subfigure}
+  \subcaption{IIWA arm}
+\end{figure}
 
 We've decided to use the related Robomimic dataset to train our models. 
 The first task we wanted to achieve is to train a model on a task (e.g. Lift - which consists of picking up a red cube from the table), and evaluate it on a slight variation of the same task (e.g. changing the colour of the cube to blue, or changing the shape to a cylinder). 
@@ -131,7 +145,7 @@ With a significantly faster training time we have managed to get a a model that 
 
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{non_icl_variance_graph.png} % Load image & set width
+    \includegraphics[width=0.7\textwidth]{images/plots/non_icl_variance_graph.png} % Load image & set width
     \caption{Training and validation loss as well as success rates across epochs of training a bare Decision Transformer on the Lift task.}
     \label{fig:non_icl_variance_graph} 
 \end{figure}
@@ -142,7 +156,7 @@ Because of this we have decided to evaluate 5 last models of the training of our
 We have also decided to evaluate the model - trained on only the red cube - on the blue and green cubes. It showed similar zero-shot performance as on the red cube.
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{multi_colour.png} % Load image & set width
+    \includegraphics[width=0.7\textwidth]{images/plots/multi_colour.png} % Load image & set width
     \caption{Performance of the model on different cube colors.}
     \label{fig:multi_colour} 
 \end{figure}
@@ -153,7 +167,7 @@ To get better insights into it we first evaluated it on the Lift task.
 
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{baseline_icl.png} % Load image & set width
+    \includegraphics[width=0.7\textwidth]{images/plots/baseline_icl.png} % Load image & set width
     \caption{Performance of the model trained with in-context learning on the Lift task.}
     \label{fig:baseline_icl} 
 \end{figure}
@@ -162,7 +176,7 @@ Since it still didn't show any performance improvements we have also tried to us
 
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{time_based.png} % Load image & set width
+    \includegraphics[width=0.7\textwidth]{images/plots/time_based.png} % Load image & set width
     \caption{Performance of the model trained with in-context learning and time based rewards on the Lift task.}
     \label{fig:time_based}
 \end{figure}
@@ -172,14 +186,14 @@ Machine-Generated and Multi-Human datasets - which are of much lower quality tha
 
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{icl_with_mh.png} % Load image & set width
+    \includegraphics[width=0.7\textwidth]{images/plots/icl_with_mh.png} % Load image & set width
     \caption{Time based rewards + ICL + PH + MH dataset.}
     \label{fig:icl_with_mh}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{icl_with_mg.png} % Load image & set width
+    \includegraphics[width=0.7\textwidth]{images/plots/icl_with_mg.png} % Load image & set width
     \caption{Time based rewards + ICL + MG dataset.}
     \label{fig:icl_with_mg}
 \end{figure}
@@ -203,7 +217,7 @@ We were determined to stack the cubes though so we have decided to try to train 
 We'd also decided to use weighted data sampling to give a higher weight to the Stack task - in hopes that it would help the model learn to stack the cubes.
 \begin{figure}[htbp]
     \centering % Centers the image horizontally
-    \includegraphics[width=0.7\textwidth]{lift_and_stack.png}
+    \includegraphics[width=0.7\textwidth]{images/plots/lift_and_stack.png}
     \caption{Performance of the model trained on Lift and Stack tasks.}
     \label{fig:lift_and_stack}
 \end{figure}
