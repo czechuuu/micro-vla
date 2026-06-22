@@ -33,7 +33,7 @@ ax.plot(epochs, maxs, label='Max Success Rate', color='green', linestyle='--', m
 # Graph customization
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Success Rate (%)')
-ax.set_title('Standard_Lift Success Rate Metrics per Epoch on PH+MG+MH with fusing observations and time-based rewards', fontsize=14, pad=15)
+ax.set_title('Lift Success Rate per Epoch of the best model trained on PH+MH+MG', fontsize=14, pad=15)
 ax.set_xticks(epochs)
 ax.set_ylim(0, 100)
 ax.grid(True, linestyle=':', alpha=0.6)
