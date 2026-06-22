@@ -16,7 +16,8 @@ from src.eval.tasks import (
     build_color_varied_lift,
     build_color_varied_lift_with_distractor,
     build_puck_lift,
-    build_nut_assembly_square
+    build_nut_assembly_square,
+    build_sawyer_lift
 )
 
 def main():
@@ -44,13 +45,19 @@ def main():
         "--tasks", 
         nargs="+", 
         default=["Standard_Lift", "Red_Cube_Lift"],
-        help="Tasks to evaluate (Standard_Lift, Standard_Stack, Red_Cube_Lift, Blue_Cube_Lift, Green_Cube_Lift, Blue_Cube_With_Distractor_Lift, Puck_Lift, Nut_Assembly_Square)."
+        help="Tasks to evaluate (Standard_Lift, Standard_Stack, Red_Cube_Lift, Blue_Cube_Lift, Green_Cube_Lift, Blue_Cube_With_Distractor_Lift, Puck_Lift, Nut_Assembly_Square, Sawyer_Lift)."
     )
     parser.add_argument(
         "--lift-dataset", 
         type=str, 
         default="dino3-embeddings/block-lifting/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for Standard_Lift."
+    )
+    parser.add_argument(
+        "--sawyer-lift-dataset", 
+        type=str, 
+        default="dino3-embeddings/block-lifting/ph.hdf5",
+        help="HF or local HDF5 path to extract context demonstrations for Sawyer_Lift."
     )
     parser.add_argument(
         "--stack-dataset", 
@@ -191,6 +198,17 @@ def main():
         else:
             nut_h5 = os.path.abspath(args.nut_dataset)
 
+    sawyer_lift_h5 = args.sawyer_lift_dataset
+    if "Sawyer_Lift" in args.tasks:
+        if not os.path.exists(args.sawyer_lift_dataset):
+            try:
+                sawyer_lift_h5 = resolve_hdf5_path(args.sawyer_lift_dataset)
+            except Exception as e:
+                print(f"Error: Could not resolve sawyer lift dataset '{args.sawyer_lift_dataset}': {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            sawyer_lift_h5 = os.path.abspath(args.sawyer_lift_dataset)
+
     # Loop over all checkpoints
     all_runs_results = {}
 
@@ -249,6 +267,7 @@ def main():
             "Blue_Cube_With_Distractor_Lift": lambda: build_color_varied_lift_with_distractor(horizon=args.horizon, rgba=[0, 0, 1, 1], distractor_rgba=[1, 0, 0, 1]),
             "Puck_Lift": lambda: build_puck_lift(horizon=args.horizon),
             "Nut_Assembly_Square": lambda: build_nut_assembly_square(cfg=cfg, hdf5_path=nut_h5, horizon=args.horizon),
+            "Sawyer_Lift": lambda: build_sawyer_lift(cfg=cfg, hdf5_path=sawyer_lift_h5, horizon=args.horizon),
         }
         
         # Filter requested tasks
