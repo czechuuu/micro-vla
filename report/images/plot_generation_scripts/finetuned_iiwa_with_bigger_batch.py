@@ -71,7 +71,7 @@ def plot_subplot(ax, data, title):
     ax.plot(epochs, maxs, label='Max Success Rate', color='green', linestyle='--', marker='^')
 
     # Graph customization
-    ax.set_xlabel('Epoch')
+    ax.set_xlabel('Num. Grad Updates')
     ax.set_ylabel('Success Rate (%)')
     ax.set_title(title)
     ax.set_xticks(epochs)
@@ -87,8 +87,8 @@ plot_subplot(ax1, data_batch_8, 'Batch Size 8')
 plot_subplot(ax2, data_batch_64, 'Batch Size 64')
 
 # Add the main title across the entire figure
-fig.suptitle('IIWA_Lift Success Rate against gradient updates fine-tuning Panda on 10 demonstrations of IIWA', fontsize=12, y=0.98)
+fig.suptitle('IIWA arm Lift Success Rate on lift from fine-tuning the Panda arm model per num. grad updates', fontsize=12, y=0.98)
 
 # Adjust layout and save the visualization
 plt.tight_layout()
-plt.savefig('finetuned_iiwa.png', dpi=300)
+plt.savefig('finetuned_iiwa_with_bigger_batch.png', dpi=300)
