@@ -171,7 +171,7 @@ We have implemented a standard training loop with MSE loss. We have enabled trai
 
 \subsection{Initial Experiment}
 We performed an initial experiment to test whether this architecture was capable of learning the simplest of our tasks - block lifting.
-The experiment was successful (see Figure 6), however we came across a weird phenomenon (also described in the original \textit{robomimic} paper).
+The experiment was successful (see Figure~\ref{fig:non_icl_variance_graph}), however we came across a weird phenomenon (also described in the original \textit{robomimic} paper).
 The validation loss didn't correlate with model's performance inside the environment.
 This meant that for every experiment we had to perform validation rollouts inside the environment to accurately grasp model progress,
 and that it is worth to train the model much longer than we initially thought.
@@ -182,13 +182,14 @@ Another important thing to note is that the training is really unstable and the 
     \centering
     \includegraphics[width=\textwidth]{images/plots/non_icl_variance_graph.png}
     \caption{Training and validation losses, as well as success rates plotted against the training epochs on the block lifting task.}
+    \label{fig:non_icl_variance_graph}
 \end{figure}
 
 \section{Task Generalization}
 We performed a large number of experiments that tested generalization between tasks.
 
 \subsection{Color Change}
-A model trained on the block lifting task with a red cube exhibited equal zero-shot performance on cubes of different colors (see Figure 7).
+A model trained on the block lifting task with a red cube exhibited equal zero-shot performance on cubes of different colors (see Figure~\ref{fig:multi_colour}).
 However, after inspecting the actual produced trajectories (also failures) we noticed that unfortunately it's not true generalization,
 but instead overfitting to block position (a recurring problem in this project).
 
@@ -196,40 +197,53 @@ but instead overfitting to block position (a recurring problem in this project).
     \centering
     \includegraphics[width=\textwidth]{images/plots/multi_colour.png}
     \caption{Model performance on different cube colors.}
+    \label{fig:multi_colour}
 \end{figure}
 
 \subsection{Training with In-Context Prompts}
 A model trained with in-context prompts didn't achieve better one-shot performance than a baseline zero-shot model on the trained task
-(see Figure 8 and remember that the best version of the initial model scored $\sim$ 90\%).
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{images/plots/baseline_icl.png}
-    \caption{Performance of the model trained with in-context prompts on the block lifting task.}
-\end{figure}
+(see Figure~\ref{fig:baseline_icl} and remember that the best version of the initial model scored $\sim$ 90\%).
 
 \subsection{Scaling Up Training with In-Context Prompts}
 Introducing time-based rewards (-1 for each step and +100 for success) and increasing the size of training data degraded performance on the trained task.
 The dataset was extended with demonstrations of lower quality - multi-human (MH), so datasets collected by multiple human operators of varying proficiency level, and machine generated ones (MG).
 Previously the models were trained on proficient human (PH) demonstrations.
-For the exact results see Figures 9, 10, 11.
+For the exact results see Figures~\ref{fig:time_based}, \ref{fig:icl_with_mh}, and \ref{fig:icl_with_mg}.
 Adding demonstrations of the nut assembly task also failed to produce any results.
 
 \begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/plots/baseline_icl.png}
+    \caption{Baseline model.}
+    \label{fig:baseline_icl}
+  \end{subfigure}%
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/plots/time_based.png}
-    \caption{Performance of the model trained with in-context prompts and time based rewards on the block lifting task (PH dataset).}
-\end{figure}
-\begin{figure}[htbp]
+    \caption{Time-based rewards (PH dataset).}
+    \label{fig:time_based}
+  \end{subfigure}
+  
+  \vspace{1em}
+  
+  \begin{subfigure}[b]{0.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/plots/icl_with_mh.png}
-    \caption{Performance of the model trained with in-context prompts and time based rewards on the block lifting task (PH + MH dataset).}
-\end{figure}
-
-\begin{figure}[htbp]
+    \caption{Time-based rewards (PH + MH dataset).}
+    \label{fig:icl_with_mh}
+  \end{subfigure}%
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/plots/icl_with_mg.png}
-    \caption{Performance of the model trained with in-context prompts and time based rewards on the block lifting task (MG dataset).}
+    \caption{Time-based rewards (MG dataset).}
+    \label{fig:icl_with_mg}
+  \end{subfigure}
+  \caption{Performance of the models trained with in-context prompts on the block lifting task.}
+  \label{fig:icl_plots}
 \end{figure}
 
 \subsection{In-Context Learning}
@@ -238,7 +252,7 @@ They were prompted with a block stacking trajectory, but were unable to produce 
 
 Instead of relying on pure in-context learning we tried adding a small sample of the block stacking demonstrations to the training data.
 Their representation in the dataset was small (10 block stacking vs 200 block lifting), however we attempted to balance it with weighted sampling.
-This resulted in improved performance on the main lifting task, and a glimpse of generalization with nonzero, $\sim$ 10\%, stacking success rate (see Figure 12).
+This resulted in improved performance on the main lifting task, and a glimpse of generalization with nonzero, $\sim$ 10\%, stacking success rate (see Figure~\ref{fig:lift_and_stack}).
 
 We see it as an interesting achievement, because the 10 demonstrations alone weren't enough to train a working model, but mixing them into demonstrations of a much easier task sufficed.
 This might suggest that there exists a possibility for bootstrapping - 10 manually collected demonstrations of a new task are enough for the model to incrementally produce its new training data. 
@@ -247,6 +261,7 @@ This might suggest that there exists a possibility for bootstrapping - 10 manual
     \centering
     \includegraphics[width=\textwidth]{images/plots/lift_and_stack.png}
     \caption{Performance of the model trained on the block lifting (PH) and block stacking tasks.}
+    \label{fig:lift_and_stack}
 \end{figure}
 
 \section{Cross-embodiment Generalization}
