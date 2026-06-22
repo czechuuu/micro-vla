@@ -323,8 +323,8 @@ Simultaneously learning a new task and a new embodiment proved to be too challen
   \item We suspect that the default variance in initial block and nut locations, in the \textit{robosuite} environments is too low.
     We think that it contributes to the lack of diversity in the \textit{robomimic} datasets and lead to it being exploitable by simple heuristics that "hard-code" object positions - in essence, always performing the same trajectory.
   \item We believe that a decision transformer (at least in our implementation and at our scale) is incapable of truly in-context learning new tasks or embodiments.
-    However we are confident that training a new task or embodiment requires orders of magnitude less demonstrations and this way enables in-context learning in a soft sense.
-    At least for related tasks or similar embodiments.
+  \item We observed that test-time adaptation with a few gradient updates enables cross-embodiment generalization for similar robot arns and and easy task.
+  \item We observed that the transformer architecture can make use of prompt trajectories during training for sample efficient new task acquisition.
 \end{itemize}
 
 \end{document}
