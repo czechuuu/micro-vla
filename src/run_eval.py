@@ -17,7 +17,8 @@ from src.eval.tasks import (
     build_color_varied_lift_with_distractor,
     build_puck_lift,
     build_nut_assembly_square,
-    build_iiwa_lift
+    build_iiwa_lift,
+    build_iiwa_stack
 )
 
 def main():
@@ -45,7 +46,7 @@ def main():
         "--tasks", 
         nargs="+", 
         default=["Standard_Lift", "Red_Cube_Lift"],
-        help="Tasks to evaluate (Standard_Lift, Standard_Stack, Red_Cube_Lift, Blue_Cube_Lift, Green_Cube_Lift, Blue_Cube_With_Distractor_Lift, Puck_Lift, Nut_Assembly_Square, IIWA_Lift)."
+        help="Tasks to evaluate (Standard_Lift, Standard_Stack, Red_Cube_Lift, Blue_Cube_Lift, Green_Cube_Lift, Blue_Cube_With_Distractor_Lift, Puck_Lift, Nut_Assembly_Square, IIWA_Lift, IIWA_Stack)."
     )
     parser.add_argument(
         "--lift-dataset", 
@@ -64,6 +65,12 @@ def main():
         type=str, 
         default="dino3-embeddings/block-stacking/panda/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for Standard_Stack."
+    )
+    parser.add_argument(
+        "--iiwa-stack-dataset", 
+        type=str, 
+        default="dino3-embeddings/block-stacking/iiwa/ph.hdf5",
+        help="HF or local HDF5 path to extract context demonstrations for IIWA_Stack."
     )
     parser.add_argument(
         "--nut-dataset", 
@@ -209,6 +216,17 @@ def main():
         else:
             iiwa_lift_h5 = os.path.abspath(args.iiwa_lift_dataset)
 
+    iiwa_stack_h5 = args.iiwa_stack_dataset
+    if "IIWA_Stack" in args.tasks:
+        if not os.path.exists(args.iiwa_stack_dataset):
+            try:
+                iiwa_stack_h5 = resolve_hdf5_path(args.iiwa_stack_dataset)
+            except Exception as e:
+                print(f"Error: Could not resolve iiwa stack dataset '{args.iiwa_stack_dataset}': {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            iiwa_stack_h5 = os.path.abspath(args.iiwa_stack_dataset)
+
     # Loop over all checkpoints
     all_runs_results = {}
 
@@ -268,6 +286,7 @@ def main():
             "Puck_Lift": lambda: build_puck_lift(horizon=args.horizon),
             "Nut_Assembly_Square": lambda: build_nut_assembly_square(cfg=cfg, hdf5_path=nut_h5, horizon=args.horizon),
             "IIWA_Lift": lambda: build_iiwa_lift(cfg=cfg, hdf5_path=iiwa_lift_h5, horizon=args.horizon),
+            "IIWA_Stack": lambda: build_iiwa_stack(cfg=cfg, hdf5_path=iiwa_stack_h5, horizon=args.horizon),
         }
         
         # Filter requested tasks
