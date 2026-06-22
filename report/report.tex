@@ -33,7 +33,7 @@ The decision was motivated by its easily configurable environments with an optio
 \subsection{Tasks}
 We chose a subset of three tasks, based on the following criteria: they have an obvious difficulty ordering, they can be seen as a natural extension of one another, and they have accompanying dataset (with an asterisk described in a later section).
 
-\subsubsection{Block Lifting}
+\subsubsection{Block Lifting - Lift}
 A cube is placed on the tabletop in front of a single robot arm.
 The robot arm must lift the cube above a certain height.
 The cube's location is randomized at the beginning of each episode.
@@ -54,10 +54,10 @@ The cube's location is randomized at the beginning of each episode.
   \begin{subfigure}[b]{0.20\textwidth}
     \includegraphics[width=\textwidth]{images/lift/demo-55.png}
   \end{subfigure}%
-  \caption {\textit{Block Lifting} task demonstration}
+  \caption {\textit{Lift} task demonstration}
 \end{figure}
 
-\subsubsection{Block Stacking}
+\subsubsection{Block Stacking - Stack}
 Two cubes (red and green) are placed on the tabletop in front of a single robot arm.
 The robot must place the red cube on top of the green cube.
 The cubes' locations are randomized at the beginning of each episode.
@@ -78,10 +78,10 @@ The cubes' locations are randomized at the beginning of each episode.
   \begin{subfigure}[b]{0.20\textwidth}
     \includegraphics[width=\textwidth]{images/stack/demo-95.png}
   \end{subfigure}%
-  \caption {\textit{Block Stacking} task demonstration}
+  \caption {\textit{Stack} task demonstration}
 \end{figure}
 
-\subsubsection{Nut Assembly (one square nut variant)}
+\subsubsection{Nut Assembly (one square nut variant) - Nut}
 Two colored pegs (one square and one round) are mounted on the tabletop, and a square nut is placed on the table in front of a single robot arm.
 The robot must fit the square nut onto the square peg.
 The nut's location is randomized at the beginning of each episode, while the pegs are fixed.
@@ -102,7 +102,7 @@ The nut's location is randomized at the beginning of each episode, while the peg
   \begin{subfigure}[b]{0.20\textwidth}
     \includegraphics[width=\textwidth]{images/nut/demo-125.png}
   \end{subfigure}%
-  \caption {\textit{Nut Assembly} task demonstration}
+  \caption {\textit{Nut} task demonstration}
 \end{figure}
 
 
@@ -131,10 +131,10 @@ Two distinct arms were necessary to evaluate cross-embodiment generalization.
 As our training data we mainly used demonstrations sourced from \href{https://huggingface.co/datasets/robomimic/robomimic_datasets}{\textit{robomimic}}.
 In its totality, \textit{robomimic} is a more general framework, but we used it solely as a source of human demonstrations and dataset processing scripts.
 
-From \textit{robomimic} we took proficient human and multi-human (divided into "better", "okay" and "worse" operators) demonstrations for block lifting and nut assembly tasks (using the Panda arm),
-as well as the machine generated trajectories for block lifting (again, using the Panda arm).
+From \textit{robomimic} we took proficient human and multi-human (divided into "better", "okay" and "worse" operators) demonstrations for Lift and Nut tasks (using the Panda arm),
+as well as the machine generated trajectories for Lift (again, using the Panda arm).
 
-What we couldn't find in \textit{robomimic's} archive, we collected ourselves - block stacking demonstrations (using Panda and IIWA arms), and block lifting demonstrations for the IIWA arm.
+What we couldn't find in \textit{robomimic's} archive, we collected ourselves - Stack demonstrations (using Panda and IIWA arms), and Lift demonstrations for the IIWA arm.
 
 We also had to process those datasets to prepare the camera observations, rewards, and feature extractor embeddings of the camera observations for training efficiency (the feature extractor is described in the following section).
 The original datasets only contained raw trajectories (action, joint and environment state sequences).
@@ -142,7 +142,7 @@ The original datasets only contained raw trajectories (action, joint and environ
 All of our training data is publicly available on \href{https://huggingface.co/datasets/aboguszewski/robomimic}{\textit{HuggingFace}} with a comprehensive dataset card that goes into more technical details.
 
 \section{Model Architecture}
-We used  a rather standard Decision Transformer architecture - with some implementation details described below.
+We used  a rather standard Decision Transformer architecture ($\sim$ 47M parameters) - with some implementation details described below.
 The whole implementation of this project is available on \href{https://github.com/czechuuu/micro-vla}{GitHub}.
 \subsection{Rewards}
 We made using rewards optional - as when learning from expert trajectories they don't carry much information.
@@ -170,7 +170,7 @@ Using sinusoidal positional embeddings and not resetting the timestep counters w
 We have implemented a standard training loop with MSE loss. We have enabled training on multiple datasets with configurable weighed sampling. 
 
 \subsection{Initial Experiment}
-We performed an initial experiment to test whether this architecture was capable of learning the simplest of our tasks - block lifting.
+We performed an initial experiment to test whether this architecture was capable of learning the simplest of our tasks - Lift.
 The experiment was successful (see Figure~\ref{fig:non_icl_variance_graph}), however we came across a weird phenomenon (also described in the original \textit{robomimic} paper).
 The validation loss didn't correlate with model's performance inside the environment.
 This meant that for every experiment we had to perform validation rollouts inside the environment to accurately grasp model progress,
@@ -181,7 +181,7 @@ Another important thing to note is that the training is really unstable and the 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/plots/non_icl_variance_graph.png}
-    \caption{Training and validation losses, as well as success rates plotted against the training epochs on the block lifting task.}
+    \caption{Training and validation losses, as well as success rates plotted against the training epochs on the Lift task.}
     \label{fig:non_icl_variance_graph}
 \end{figure}
 
@@ -189,7 +189,7 @@ Another important thing to note is that the training is really unstable and the 
 We performed a large number of experiments that tested generalization between tasks.
 
 \subsection{Color Change}
-A model trained on the block lifting task with a red cube exhibited equal zero-shot performance on cubes of different colors (see Figure~\ref{fig:multi_colour}).
+A model trained on the Lift task with a red cube exhibited equal zero-shot performance on cubes of different colors (see Figure~\ref{fig:multi_colour}).
 However, after inspecting the actual produced trajectories (also failures) we noticed that unfortunately it's not true generalization,
 but instead overfitting to block position (a recurring problem in this project).
 
@@ -242,17 +242,17 @@ Adding demonstrations of the nut assembly task also failed to produce any result
     \caption{Time-based rewards (MG dataset).}
     \label{fig:icl_with_mg}
   \end{subfigure}
-  \caption{Performance of the models trained with in-context prompts on the block lifting task.}
+  \caption{Performance of the models trained with in-context prompts on the Lift task.}
   \label{fig:icl_plots}
 \end{figure}
 
 \subsection{In-Context Learning}
-All previously described models trained with in-context prompts, were evaluated on the block stacking task and achieved $\sim$ 0\% success rate.
-They were prompted with a block stacking trajectory, but were unable to produce a successful one.
+All previously described models trained with in-context prompts, were evaluated on the Stack task and achieved $\sim$ 0\% success rate.
+They were prompted with a Stack trajectory, but were unable to produce a successful one.
 
-Instead of relying on pure in-context learning we tried adding a small sample of the block stacking demonstrations to the training data.
-Their representation in the dataset was small (10 block stacking vs 200 block lifting), however we attempted to balance it with weighted sampling.
-This resulted in improved performance on the main lifting task, and a glimpse of generalization with nonzero, $\sim$ 10\%, stacking success rate (see Figure~\ref{fig:lift_and_stack}).
+Instead of relying on pure in-context learning we tried adding a small sample of the Stack demonstrations to the training data.
+Their representation in the dataset was small (10 Stack vs 200 Lift), however we attempted to balance it with weighted sampling.
+This resulted in improved performance on the main Lift task, and a glimpse of generalization with nonzero, $\sim$ 10\%, Stack success rate (see Figure~\ref{fig:lift_and_stack}).
 
 We see it as an interesting achievement, because the 10 demonstrations alone weren't enough to train a working model, but mixing them into demonstrations of a much easier task sufficed.
 This might suggest that there exists a possibility for bootstrapping - 10 manually collected demonstrations of a new task are enough for the model to incrementally produce its new training data. 
@@ -260,7 +260,7 @@ This might suggest that there exists a possibility for bootstrapping - 10 manual
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/plots/lift_and_stack.png}
-    \caption{Performance of the model trained on the block lifting (PH) and block stacking tasks.}
+    \caption{Performance of the model trained on Lift (PH) and Stack tasks.}
     \label{fig:lift_and_stack}
 \end{figure}
 
@@ -310,9 +310,9 @@ Simultaneously learning a new task and a new embodiment proved to be too challen
 \begin{itemize}
   \item We suspect that the default variance in initial block and nut locations, in the \textit{robosuite} environments is too low.
     We think that it contributes to the lack of diversity in the \textit{robomimic} datasets and lead to it being exploitable by simple heuristics that "hard-code" object positions - in essence, always performing the same trajectory.
-  \item We believe that a decision transformer (at least in our implementation and at our scale) is incapable of truly in-context learning new tasks.
-    However we are confident that training a new task requires orders of magnitude less demonstrations and this way enables in-context learning in a soft sense.
-  \item TODO
+  \item We believe that a decision transformer (at least in our implementation and at our scale) is incapable of truly in-context learning new tasks or embodiments.
+    However we are confident that training a new task or embodiment requires orders of magnitude less demonstrations and this way enables in-context learning in a soft sense.
+    At least for related tasks or similar embodiments.
 \end{itemize}
 
 \end{document}
