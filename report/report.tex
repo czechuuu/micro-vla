@@ -307,6 +307,12 @@ Simultaneously learning a new task and a new embodiment proved to be too challen
 \end{figure}
 
 \section{Conclusions}
-
+\begin{itemize}
+  \item We suspect that the default variance in initial block and nut locations, in the \textit{robosuite} environments is too low.
+    We think that it contributes to the lack of diversity in the \textit{robomimic} datasets and lead to it being exploitable by simple heuristics that "hard-code" object positions - in essence, always performing the same trajectory.
+  \item We believe that a decision transformer (at least in our implementation and at our scale) is incapable of truly in-context learning new tasks.
+    However we are confident that training a new task requires orders of magnitude less demonstrations and this way enables in-context learning in a soft sense.
+  \item TODO
+\end{itemize}
 
 \end{document}
