@@ -9,3 +9,4 @@ report.fls
 report.log
 report.out
 report.synctex.gz
+*.pdf
