@@ -18,7 +18,7 @@ def main():
     parser.add_argument(
         "--datasets", 
         nargs="+", 
-        default=["dino3-embeddings/block-lifting/ph.hdf5"],
+        default=["dino3-embeddings/block-lifting/panda/ph.hdf5"],
         help="List of HF dataset paths or local paths to HDF5 files."
     )
     parser.add_argument(

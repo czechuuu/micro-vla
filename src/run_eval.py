@@ -50,19 +50,19 @@ def main():
     parser.add_argument(
         "--lift-dataset", 
         type=str, 
-        default="dino3-embeddings/block-lifting/ph.hdf5",
+        default="dino3-embeddings/block-lifting/panda/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for Standard_Lift."
     )
     parser.add_argument(
         "--iiwa-lift-dataset", 
         type=str, 
-        default="dino3-embeddings/block-lifting/ph.hdf5",
+        default="dino3-embeddings/block-lifting/iiwa/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for IIWA_Lift."
     )
     parser.add_argument(
         "--stack-dataset", 
         type=str, 
-        default="dino3-embeddings/block-stacking/ph.hdf5",
+        default="dino3-embeddings/block-stacking/panda/ph.hdf5",
         help="HF or local HDF5 path to extract context demonstrations for Standard_Stack."
     )
     parser.add_argument(
