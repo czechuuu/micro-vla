@@ -108,7 +108,20 @@ def train_micro_vla(
     # -----------------------------------------
     # 3. Initialize Model & Optimizer
     # -----------------------------------------
-    model = MicroVLADecisionTransformer(config).to(config.device)
+    model = MicroVLADecisionTransformer(config)
+    if config.from_pretrained is not None:
+        if os.path.exists(config.from_pretrained):
+            print(f"Loading pretrained weights from: {config.from_pretrained}")
+            state_dict = torch.load(config.from_pretrained, map_location="cpu")
+            missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
+            if missing_keys:
+                print(f"Warning: Missing keys when loading pretrained weights: {missing_keys}")
+            if unexpected_keys:
+                print(f"Warning: Unexpected keys when loading pretrained weights: {unexpected_keys}")
+        else:
+            raise FileNotFoundError(f"Pretrained model path '{config.from_pretrained}' not found.")
+            
+    model = model.to(config.device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
 
     mode_str = "ICL" if use_icl else "Baseline"

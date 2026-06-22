@@ -4,6 +4,7 @@ import torch
 @dataclass
 class Config:
     model_id: str | None = None
+    from_pretrained: str | None = None
     device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     action_dim: tuple[int] = (7,)
     obs_dim: tuple[int] = (7,)

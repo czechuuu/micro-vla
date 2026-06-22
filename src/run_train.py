@@ -59,6 +59,12 @@ def main():
         default=None,
         help="Path to a JSON file containing argument overrides."
     )
+    parser.add_argument(
+        "--from-pretrained", "--from_pretrained",
+        type=str,
+        default=None,
+        help="Path to a pretrained checkpoint to finetune from."
+    )
 
     args = parser.parse_args()
 
@@ -125,7 +131,8 @@ def main():
         fuse_observations=args.fuse_observations,
         use_time_based_rewards=args.use_time_based_rewards,
         time_based_success_reward=args.time_based_success_reward,
-        target_return=args.target_return
+        target_return=args.target_return,
+        from_pretrained=args.from_pretrained
     )
     
     # 4. Trigger training
