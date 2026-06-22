@@ -50,6 +50,81 @@ One thing worth noticing is the variance of the success rates across epochs and 
 Because of this we have decided to evaluate 5 last models of the training of our models instead of just the best one (in terms of validation loss) - and to report the success rates across those 5 models.
 
 We have also decided to evaluate the model - trained on only the red cube - on the blue and green cubes. It showed similar zero-shot performance as on the red cube.
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{multi_colour.png} % Load image & set width
+    \caption{Performance of the model on different cube colors.}
+    \label{fig:multi_colour} 
+\end{figure}
+
+\subsection{In-context learning}
+We also implemented in-context learning - where we also provide the model with a successful trajectory of the task (also during training).
+To get better insights into it we first evaluated it on the Lift task.
+
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{baseline_icl.png} % Load image & set width
+    \caption{Performance of the model trained with in-context learning on the Lift task.}
+    \label{fig:baseline_icl} 
+\end{figure}
+
+Since it still didn't show any performance improvements we have also tried to use time based rewards - where we give a reward of -1 at every step, and +100 on success. This is meant to help the model discriminate between better and worse trajectories (e.g. ones that are closer to success, or ones that achieve success faster).
+
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{time_based.png} % Load image & set width
+    \caption{Performance of the model trained with in-context learning and time based rewards on the Lift task.}
+    \label{fig:time_based}
+\end{figure}
+
+This was mainly motivated by the fact that we wanted to test if by giving the model more data we would be able to get better performance - and to do that we'd have to include trajectories from the
+Machine-Generated and Multi-Human datasets - which are of much lower quality than the Proficient Human dataset.
+
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{icl_with_mh.png} % Load image & set width
+    \caption{Time based rewards + ICL + PH + MH dataset.}
+    \label{fig:icl_with_mh}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{icl_with_mg.png} % Load image & set width
+    \caption{Time based rewards + ICL + MG dataset.}
+    \label{fig:icl_with_mg}
+\end{figure}
+
+These didn't show any significant improvements.
+
+We have also tried experimenting with observation embeddings - embedding the images separately to let the model attend to the camera on its wrist or in front of it separately or embedding it into one embedding - but with no success. 
+
+\subsection{Training on multiple tasks}
+Since any of the above approaches still couldn't give us success on the Stack task we have decided to try to train a model on the Lift and Nut Assembly tasks and evaluate it on the Stack task.
+The motivation was that it would force the model to learn that there is more than one task - and to actually look at the successful demonstration in the context.
+This still didn't give us any improvements on the Stack performance. But upon inspecting the trajectories we have realized the cause - the model was drastically overfitting. 
+The model (trained on both Nut and Lift) when tasked with Lift during evaluation would always reach in the direction of the non-existent Nut - and wouldn't reach for the cube.
+Upon closer inspection of our prior results from the Lift task we have realized that the model was overfitting there as well - but it didn't show up as drastically due to the nature of the environment.
+The failures it had were often (but not always) due to the cube being towards the edge of its spawning position - and the model would then reach not in its direction but rather towards the center of the spawn position.  
+
+We'd tried to use weighted data sampling to mitigate this - in hopes that when we gave a higher weight to Lift the model would still remember how to reach for the cube but the smaller weight on Nut Assembly would help it learn to genralize to new tasks but with no success.
+
+\subsection{Trying to stack cubes anyway}
+We were determined to stack the cubes though so we have decided to try to train a model on the Lift task (PH dataset of 200 trajectories) and a small manually collected dataset of 10 trajectories of Stack.
+We'd also decided to use weighted data sampling to give a higher weight to the Stack task - in hopes that it would help the model learn to stack the cubes.
+\begin{figure}[htbp]
+    \centering % Centers the image horizontally
+    \includegraphics[width=0.7\textwidth]{lift_and_stack.png}
+    \caption{Performance of the model trained on Lift and Stack tasks.}
+    \label{fig:lift_and_stack}
+\end{figure}
+This showed some results - we were able to sometimes (altough rather rarely) stack the cubes while still retaining decent performance on the Lift task. 
+This is a nice result because training the Decision Transformer on only the 10 Stack trajectories was FAR from enough to learn to stack the cubes. 
+But providing a solid foundation of the Lift task and then giving it a small amount of data on the Stack task was enough to get some successful stacking trajectories.
+
+\section{Conclusions}
+% Nie wiem co tutaj moze byc
+The processed datasets can be found on huggingface: \url{https://huggingface.co/datasets/adrianboguszewski/robomimic}
+ and all the code can be found on github: \url{https://github.com/czechuuu/micro-vla}.
 
 
 \end{document}
